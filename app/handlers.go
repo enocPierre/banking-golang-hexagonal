@@ -3,8 +3,10 @@ package app
 import (
 	"encoding/json"
 	"encoding/xml"
-	"fmt"
 	"net/http"
+
+	"github.com/golang/Hexagonal-golangBancking/service"
+	//"google.golang.org/grpc/channelz/service"
 )
 
 type Customer struct {
@@ -13,15 +15,17 @@ type Customer struct {
 	Zipcode string `json:"zip_code" xml:"zipcode"`
 }
 
-func greet(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "Hello word!!")
+type CustomerHandlers struct {
+	service service.CustomerService
 }
 
-func getAllCustomers(w http.ResponseWriter, r *http.Request) {
-	customers := []Customer {
-		{"Ashis", "New Oleans", "23409"},
-		{"Pierre", "Philadelphia", "234567"},
-	}
+func (ch *CustomerHandlers) getAllCustomers(w http.ResponseWriter, r *http.Request) {
+	//customers := []Customer {
+	//	{"Ashis", "New Oleans", "23409"},
+	//	{"Pierre", "Philadelphia", "234567"},
+	//}
+	
+	customers, _ := ch.service.GetAllCustomer()
 
 	if r.Header.Get("Content-Type") == "application/xml" {
 		w.Header().Add("Content-Type", "application/xml")
