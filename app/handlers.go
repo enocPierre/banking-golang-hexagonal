@@ -3,7 +3,6 @@ package app
 import (
 	"encoding/json"
 	"encoding/xml"
-	"fmt"
 	"net/http"
 
 	"github.com/golang/Hexagonal-golangBancking/service"
@@ -11,22 +10,12 @@ import (
 	//"google.golang.org/grpc/channelz/service"
 )
 
-type Customer struct {
-	Name	string `json:"full_name" xml:"name"`
-	City	string `json:"city" xml:"city"`
-	Zipcode string `json:"zip_code" xml:"zipcode"`
-}
-
 type CustomerHandlers struct {
 	service service.CustomerService
 }
 
 func (ch *CustomerHandlers) getAllCustomers(w http.ResponseWriter, r *http.Request) {
-	//customers := []Customer {
-	//	{"Ashis", "New Oleans", "23409"},
-	//	{"Pierre", "Philadelphia", "234567"},
-	//}
-	
+
 	customers, _ := ch.service.GetAllCustomer()
 
 	if r.Header.Get("Content-Type") == "application/xml" {
@@ -34,7 +23,7 @@ func (ch *CustomerHandlers) getAllCustomers(w http.ResponseWriter, r *http.Reque
 		xml.NewEncoder(w).Encode(customers)
 	} else {
 		w.Header().Add("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(customers)	
+		json.NewEncoder(w).Encode(customers)
 	}
 }
 
@@ -44,10 +33,16 @@ func (ch *CustomerHandlers) getCustomer(w http.ResponseWriter, r *http.Request) 
 
 	customer, err := ch.service.GetCustomer(id)
 	if err != nil {
-		w.WriteHeader(err.Code)
-		fmt.Fprintf(w, err.Message)
+		writeResponse(w, err.Code, err.AsMessage())
 	} else {
-		w.Header().Add("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(customer)
+		writeResponse(w, http.StatusOK, customer)
+	}
+}
+
+func writeResponse(w http.ResponseWriter, code int, data interface{}) {
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(code)
+	if err := json.NewEncoder(w).Encode(data); err != nil {
+		panic(err)
 	}
 }
