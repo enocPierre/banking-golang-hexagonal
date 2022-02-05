@@ -7,6 +7,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang/Hexagonal-golangBancking/errs"
+	"github.com/golang/Hexagonal-golangBancking/logger"
 	//"golang.org/x/tools/go/analysis/passes/nilfunc"
 )
 
@@ -30,7 +31,7 @@ func (d CustomerRepositoryDb) FindAll() ([]Customer, error) {
 		var c Customer
 		err := rows.Scan(&c.Id, &c.Name, &c.City, &c.Zipcode, &c.DateofBirth, &c.Status)
 		if err != nil {
-			log.Println("Error While querying customer table " + err.Error())
+			logger.Error("Error While querying customer table " + err.Error())
 			return nil, err
 		}
 
@@ -49,7 +50,7 @@ func (d CustomerRepositoryDb) ById(id string) (*Customer, *errs.AppError) {
 		if err == sql.ErrNoRows {
 			return nil, errs.NewNotFoundError("Custommer not found")
 		} else {
-			log.Println("Error while scanning customer " + err.Error())
+			logger.Error("Error while scanning customer " + err.Error())
 			return nil, errs.NewUnexpectedError("Unexpected database error")
 		}
 	}
